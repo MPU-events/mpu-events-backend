@@ -26,7 +26,7 @@ class EventResponseDTO(BaseModel):
     start_time: datetime
     location: str
     max_participants: int | None
-    current_participants: int
+    current_participants: int = 0
     created_by: UUID
     created_at: datetime
 

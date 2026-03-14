@@ -34,3 +34,8 @@ async def login(dto: LoginUserDTO, session: AsyncSession = Depends(get_db)):
         token_service=token_service,
     )
     return await use_case.execute(dto)
+
+
+@router.get("/me", response_model=UserResponseDTO)
+async def me(current_user: User = Depends(get_current_user)):
+    return current_user

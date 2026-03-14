@@ -1,26 +1,67 @@
-from functools import lru_cache
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+from dataclasses import dataclass
+from dynaconf import Dynaconf
+
+@dataclass(slots=True)
+class DatabaseConfig:
+    host: str
+    port: int
+    username: str
+    password: str
+    name: str
+    driver: str = "postgresql+asyncpg"
+
+    @property
+    def dsn(self) -> str:
+        return f"{self.driver}://{self.username}:{self.password}@{self.host}:{self.port}/{self.name}"
 
 
-class Settings(BaseSettings):
-    DATABASE_URL: str
-    JWT_SECRET_KEY: str
+@dataclass(slots=True)
+class AuthConfig:
+    jwt_secret_key: str
+    access_token_expire_minutes: int = 43200
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 30  # 30 дней
 
-    DEBUG: bool = False
-    PROJECT_NAME: str = "MPU Events"
-    VERSION: str = "1.0.0"
+@dataclass(slots=True)
+class AppConfig:
+    project_name: str
+    version: str
+    debug: bool
+    database: DatabaseConfig
+    auth: AuthConfig
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
+
+def get_config() -> AppConfig:
+    dynaconf = Dynaconf(
+        settings_files=[
+            os.getenv("CONFIG_FILE", "config/config.toml"),
+            "config/.secrets_config.toml",
+        ],
+        environments=True,
+        env_switcher="ENV_FOR_DYNACONF",
+        default_env="default",
+        merge_enabled=True,
+        load_dotenv=True,
+    )
+    db = dynaconf.DATABASE
+    auth = dynaconf.AUTH
+
+    return AppConfig(
+        project_name=dynaconf.PROJECT_NAME,
+        version=dynaconf.VERSION,
+        debug=dynaconf.DEBUG,
+        database=DatabaseConfig(
+            host=db.host,
+            port=db.port,
+            username=db.username,
+            password=db.password,
+            name=db.name,
+        ),
+        auth=AuthConfig(
+            jwt_secret_key=auth.jwt_secret_key,
+            access_token_expire_minutes=auth.access_token_expire_minutes,
+        ),
     )
 
 
-@lru_cache
-def get_settings() -> Settings:
-    return Settings()
-
-
-settings = get_settings()
+config: AppConfig = get_config()

@@ -1,7 +1,7 @@
 import jwt
 from datetime import datetime, timedelta, UTC
 from uuid import UUID
-from mpu_events.config import settings
+from mpu_events.config import config
 from mpu_events.domain.entities.user import UserRole
 from mpu_events.domain.exceptions.exceptions import UnauthorizedException
 
@@ -11,13 +11,15 @@ class TokenService:
         payload = {
             "sub": str(user_id),
             "role": role.value,
-            "exp": datetime.now(UTC) + timedelta(hours=settings.jwt_expires_hours),
+            "exp": datetime.now(UTC) + timedelta(
+                minutes=config.auth.access_token_expire_minutes
+            ),
         }
-        return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
+        return jwt.encode(payload, config.auth.jwt_secret_key, algorithm="HS256")
 
     def decode_token(self, token: str) -> dict:
         try:
-            return jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+            return jwt.decode(token, config.auth.jwt_secret_key, algorithms=["HS256"])
         except jwt.ExpiredSignatureError:
             raise UnauthorizedException("Token expired")
         except jwt.InvalidTokenError:

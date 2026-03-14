@@ -1,3 +1,4 @@
+from datetime import timezone
 from uuid import UUID
 from mpu_events.domain.interfaces.event_repository import EventRepository
 from mpu_events.domain.entities.event import Event

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from mpu_events.domain.entities.user import User
+from mpu_events.domain.entities.user import User, UserRole
+
 
 class UserRepository(ABC):
     @abstractmethod
@@ -12,3 +13,9 @@ class UserRepository(ABC):
 
     @abstractmethod
     async def create(self, user: User) -> User: ...
+
+    @abstractmethod
+    async def update(self, user: User) -> User: ...
+
+    @abstractmethod
+    async def delete(self, user_id: UUID) -> None: ...
