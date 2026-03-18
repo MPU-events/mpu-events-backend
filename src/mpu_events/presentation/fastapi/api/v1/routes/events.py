@@ -4,7 +4,7 @@ from uuid import UUID
 
 from mpu_events.application.dto.event_dto import CreateEventDTO, EventResponseDTO
 from mpu_events.application.use_cases.events.create_event import CreateEventUseCase
-#from mpu_events.application.use_cases.events.get_event import GetEventUseCase
+from mpu_events.application.use_cases.events.get_event import GetEventUseCase
 from mpu_events.application.use_cases.events.list_events import ListEventsUseCase
 from mpu_events.infra.database.repositories.event_repository import SQLAlchemyEventRepository
 from mpu_events.infra.database.repositories.registration_repository import SQLAlchemyRegistrationRepository
@@ -29,17 +29,17 @@ async def list_events(
     return await use_case.execute(skip=skip, limit=limit)
 
 
-# @router.get("/{event_id}", response_model=EventResponseDTO)
-# async def get_event(
-#     event_id: UUID,
-#     session: AsyncSession = Depends(get_db),
-#     _: User = Depends(get_current_user),
-# ):
-#     use_case = GetEventUseCase(
-#         event_repo=SQLAlchemyEventRepository(session),
-#         registration_repo=SQLAlchemyRegistrationRepository(session),
-#     )
-#     return await use_case.execute(event_id)
+@router.get("/{event_id}", response_model=EventResponseDTO)
+async def get_event(
+    event_id: UUID,
+    session: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    use_case = GetEventUseCase(
+        event_repo=SQLAlchemyEventRepository(session),
+        registration_repo=SQLAlchemyRegistrationRepository(session),
+    )
+    return await use_case.execute(event_id)
 
 
 @router.post("/", response_model=EventResponseDTO, status_code=201)

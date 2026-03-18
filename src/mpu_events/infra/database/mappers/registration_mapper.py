@@ -11,3 +11,11 @@ class RegistrationMapper:
             event_id=model.event_id,
             created_at=model.created_at,
         )
+
+    @staticmethod
+    def to_model(entity: Registration) -> RegistrationModel:
+        return RegistrationModel(
+            id=entity.id,
+            user_id=entity.user_id,
+            event_id=entity.event_id,
+        )

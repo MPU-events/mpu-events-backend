@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
 from mpu_events.domain.entities.event import Event
-from mpu_events.domain.exceptions.exceptions import EventNotFoundException
+from mpu_events.domain.exceptions.events.events import EventNotFoundException
 from mpu_events.domain.interfaces.event_repository import EventRepository
 from mpu_events.infra.database.models.event_model import EventModel
 from mpu_events.infra.database.mappers.event_mapper import EventMapper
@@ -38,7 +38,7 @@ class SQLAlchemyEventRepository(EventRepository):
         )
         model = result.scalar_one_or_none()
         if not model:
-            raise EventNotFoundException(event.id)
+            raise EventNotFoundException()
 
         model.title = event.title
         model.description = event.description

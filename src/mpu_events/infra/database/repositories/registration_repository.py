@@ -39,14 +39,23 @@ class SQLAlchemyRegistrationRepository(RegistrationRepository):
         )
         return [RegistrationMapper.to_entity(m) for m in result.scalars().all()]
 
-    async def delete(self, user_id: UUID, event_id: UUID) -> None:
+    async def get_by_user_and_event(self, user_id: UUID, event_id: UUID) -> Registration | None:
+        result = await self.session.execute(
+            select(RegistrationModel)
+            .where(RegistrationModel.user_id == user_id)
+            .where(RegistrationModel.event_id == event_id)
+        )
+        model = result.scalar_one_or_none()
+        return RegistrationMapper.to_entity(model) if model else None
+
+    async def delete(self, registration_id: UUID) -> None:
         result = await self.session.execute(
             select(RegistrationModel).where(
-                RegistrationModel.user_id == user_id,
-                RegistrationModel.event_id == event_id,
+                RegistrationModel.id == registration_id,
             )
         )
         model = result.scalar_one_or_none()
         if model:
             await self.session.delete(model)
             await self.session.flush()
+

@@ -1,6 +1,6 @@
 from mpu_events.domain.interfaces.user_repository import UserRepository
 from mpu_events.domain.entities.user import User
-from mpu_events.domain.exceptions.exceptions import EmailAlreadyExistsException
+from mpu_events.domain.exceptions.users.users import EmailAlreadyExistsException
 from mpu_events.application.dto.auth_dto import RegisterUserDTO, UserResponseDTO
 from mpu_events.application.services.password_service import PasswordService
 

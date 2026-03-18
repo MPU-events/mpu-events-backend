@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
 from mpu_events.domain.entities.user import User
+from mpu_events.domain.exceptions.users.users import UserNotFoundException
 from mpu_events.domain.interfaces.user_repository import UserRepository
 from mpu_events.infra.database.models.user_model import UserModel
 from mpu_events.infra.database.mappers.user_mapper import UserMapper
@@ -35,7 +36,7 @@ class SQLAlchemyUserRepository(UserRepository):
     async def update(self, user: User) -> User:
         model = await self.session.get(UserModel, user.id)
         if not model:
-            raise ValueError(f"User with id {user.id} not found")
+            raise UserNotFoundException(user.id)
 
         model.email = user.email
         model.full_name = user.full_name
@@ -53,7 +54,7 @@ class SQLAlchemyUserRepository(UserRepository):
     async def delete(self, user_id: UUID) -> None:
         user = await self.get_by_id(user_id)
         if not user:
-            raise ValueError(f"User with id {user_id} not found")
+            raise UserNotFoundException(user_id)
 
         stmt = delete(UserModel).where(UserModel.id == user_id)
         await self.session.execute(stmt)

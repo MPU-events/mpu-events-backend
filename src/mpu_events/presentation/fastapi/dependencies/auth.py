@@ -5,7 +5,7 @@ from uuid import UUID
 
 from mpu_events.application.services.token_service import TokenService
 from mpu_events.domain.entities.user import User, UserRole
-from mpu_events.domain.exceptions.exceptions import UnauthorizedException
+from mpu_events.domain.exceptions.auth import UnauthorizedException
 from mpu_events.infra.database.repositories.user_repository import SQLAlchemyUserRepository
 from mpu_events.presentation.fastapi.dependencies.db import get_db
 
@@ -23,7 +23,7 @@ async def get_current_user(
     repo = SQLAlchemyUserRepository(session)
     user = await repo.get_by_id(user_id)
     if not user:
-        raise UnauthorizedException("User not found")
+        raise UnauthorizedException()
 
     return user
 
