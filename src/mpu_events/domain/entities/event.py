@@ -17,8 +17,9 @@ class Event:
     current_participants: int = 0
 
     def __post_init__(self):
-        self._validate_start_time()
-        self._validate_participants_count()
+        if self.id is None:
+            self._validate_start_time()
+            self._validate_participants_count()
 
     def _validate_start_time(self) -> None:
         if not self.start_time:
