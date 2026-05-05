@@ -1,3 +1,4 @@
+from datetime import date, datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
@@ -20,11 +21,33 @@ class SQLAlchemyEventRepository(EventRepository):
         model = result.scalar_one_or_none()
         return EventMapper.to_entity(model) if model else None
 
-    async def get_all(self, skip: int = 0, limit: int = 20) -> list[Event]:
-        result = await self.session.execute(
-            select(EventModel).offset(skip).limit(limit)
-        )
-        return [EventMapper.to_entity(m) for m in result.scalars().all()]
+    async def get_all(
+        self, 
+        skip: int = 0, 
+        limit: int = 20,
+        start_date: date | None = None,
+        end_date: date | None = None,
+    ) -> list[Event]:
+        query = select(EventModel)
+        
+        if start_date:
+            start_datetime = datetime.combine(start_date, datetime.min.time())
+            start_datetime = start_datetime.replace(tzinfo=timezone.utc)
+            query = query.where(EventModel.start_time >= start_datetime)
+        
+        if end_date:
+            end_datetime = datetime.combine(end_date, datetime.max.time())
+            end_datetime = end_datetime.replace(tzinfo=timezone.utc)
+            query = query.where(EventModel.start_time <= end_datetime)
+        
+        query = query.order_by(EventModel.start_time.asc())
+        
+        query = query.offset(skip).limit(limit)
+        
+        result = await self.session.execute(query)
+        models = result.scalars().all()
+        
+        return [EventMapper.to_entity(model) for model in models]
 
     async def create(self, event: Event) -> Event:
         model = EventMapper.to_model(event)

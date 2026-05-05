@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from uuid import UUID
-from datetime import datetime
+from datetime import date, datetime
 
 
 class CreateEventDTO(BaseModel):
@@ -31,3 +31,9 @@ class EventResponseDTO(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+class EventFilterDTO(BaseModel):
+    skip: int = Field(default=0, ge=0)
+    limit: int = Field(default=20, ge=1, le=100)
+    start_date: date | None
+    end_date: date | None

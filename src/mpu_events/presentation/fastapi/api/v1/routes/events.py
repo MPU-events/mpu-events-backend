@@ -1,8 +1,9 @@
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
-from mpu_events.application.dto.event_dto import CreateEventDTO, EventResponseDTO, UpdateEventDTO
+from mpu_events.application.dto.event_dto import CreateEventDTO, EventResponseDTO, UpdateEventDTO, EventFilterDTO
 from mpu_events.application.use_cases.events.create_event import CreateEventUseCase
 from mpu_events.application.use_cases.events.delete_event import DeleteEventUseCase
 from mpu_events.application.use_cases.events.get_event import GetEventUseCase
@@ -23,14 +24,23 @@ router = APIRouter(prefix="/events", tags=["events"])
 async def list_events(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
+    start_date: date | None = Query(None, description="Начало периода"),
+    end_date: date | None = Query(None, description="Конец периода"),
     session: AsyncSession = Depends(get_db),
     _: User = Depends(get_current_user),
 ):
+    filters = EventFilterDTO(
+        skip=skip,
+        limit=limit,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    
     use_case = ListEventsUseCase(
         event_repo=SQLAlchemyEventRepository(session),
         registration_repo=SQLAlchemyRegistrationRepository(session),
     )
-    return await use_case.execute(skip=skip, limit=limit)
+    return await use_case.execute(filters)
 
 
 @router.get("/{event_id}", response_model=EventResponseDTO)
