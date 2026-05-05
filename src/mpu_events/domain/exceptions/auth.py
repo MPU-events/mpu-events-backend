@@ -14,3 +14,7 @@ class JWTExpiresUnauthorizedException(UnauthorizedException):
 class JWTInvalidUnauthorizedException(UnauthorizedException):
     def __init__(self):
         super().__init__("Невалидный токен авторизации")
+
+class PermissionDeniedException(UnauthorizedException):
+    def __init__(self):
+        super().__init__("Недостаточно прав для выполнения действия")

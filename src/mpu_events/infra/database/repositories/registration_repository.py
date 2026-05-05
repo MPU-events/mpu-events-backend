@@ -1,4 +1,4 @@
-from sqlalchemy import select, func
+from sqlalchemy import delete, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
@@ -58,4 +58,9 @@ class SQLAlchemyRegistrationRepository(RegistrationRepository):
         if model:
             await self.session.delete(model)
             await self.session.flush()
+
+    async def delete_by_event(self, event_id: UUID) -> None:
+        stmt = delete(RegistrationModel).where(RegistrationModel.event_id == event_id)
+        await self.session.execute(stmt)
+        await self.session.flush()
 
